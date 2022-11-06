@@ -1,12 +1,11 @@
-
 """
-# -- ---------------------------------------------------------------------------------------------------------      -- #
-# -- project: Lab 3 (Behavioral Finance) is a project that has tools to analyze the performance of trade history.   -- #
-# -- script: visualizations.py : Python script with the main functionality                                          -- #
-# -- author: EstebanMqz                                                                                             -- #
-# -- license: GNU General Public License v3.0                                                                       -- #
-# -- repository:  https://github.com/EstebanMqz/MyST_LAB_3_E3                                                       -- #
-# -- ---------------------------------------------------------------------------------------------------------      -- #
+# -- ------------------------------------------------------------------------------------------------------------------------   -- #
+# -- project: Lab 4 (Market Microstructure) In this laboratory OB Microstructure and its characteristics will be analyzed.      -- #
+# -- script: visualizations.py : Python script with the main functionality                                                           -- #
+# -- author: EstebanMqz                                                                                                         -- #
+# -- license: GNU General Public License v3.0                                                                                   -- #
+# -- repository: https://github.com/EstebanMqz/MyST_LAB_4                                                                       -- #
+# -- ------------------------------------------------------------------------------------------------------------------------   -- #
 """
 
 import numpy as np

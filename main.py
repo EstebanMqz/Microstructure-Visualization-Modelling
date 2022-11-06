@@ -1,12 +1,11 @@
-
 """
-# -- ---------------------------------------------------------------------------------------------------------      -- #
-# -- project: Lab 3 (Behavioral Finance) is a project that has tools to analyze the performance of trade history.   -- #
-# -- script: main.py : Python script with the main functionality                                                    -- #
-# -- author: EstebanMqz                                                                                             -- #
-# -- license: GNU General Public License v3.0                                                                       -- #
-# -- repository: https://github.com/EstebanMqz/MyST_LAB_3_E3                                                        -- #
-# -- ---------------------------------------------------------------------------------------------------------      -- #
+# -- ------------------------------------------------------------------------------------------------------------------------   -- #
+# -- project: Lab 4 (Market Microstructure) In this laboratory OB Microstructure and its characteristics will be analyzed.      -- #
+# -- script: main.py : Python script with the main functionality                                                           -- #
+# -- author: EstebanMqz                                                                                                         -- #
+# -- license: GNU General Public License v3.0                                                                                   -- #
+# -- repository: https://github.com/EstebanMqz/MyST_LAB_4                                                                       -- #
+# -- ------------------------------------------------------------------------------------------------------------------------   -- #
 """
 import chart_studio.plotly as py   # various tools (jupyter offline print)
 import plotly.graph_objects as go  # plotting engine
@@ -20,10 +19,3 @@ from os import path
 import fire
 
 
-df_1_tabla_c = dt.df_1_tabla_c
-df_1_tabla_m = dt.df_1_tabla_m
-df_1_tabla_e = dt.df_1_tabla_e
-
-df_2_tabla_c = dt.df_2_tabla_c
-df_2_tabla_m = dt.df_2_tabla_m
-df_2_tabla_e = dt.df_2_tabla_e
