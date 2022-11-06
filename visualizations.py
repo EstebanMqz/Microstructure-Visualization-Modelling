@@ -1,10 +1,10 @@
 """
 # -- ------------------------------------------------------------------------------------------------------------------------   -- #
 # -- project: Lab 4 (Market Microstructure) In this laboratory OB Microstructure and its characteristics will be analyzed.      -- #
-# -- script: visualizations.py : Python script with the main functionality                                                           -- #
+# -- script: visualizations.py : Python script with the main functionality                                                      -- #
 # -- author: EstebanMqz                                                                                                         -- #
 # -- license: GNU General Public License v3.0                                                                                   -- #
-# -- repository: https://github.com/EstebanMqz/MyST_LAB_4                                                                       -- #
+# -- repository: https://github.com/EstebanMqz/MyST_LAB_4/blob/main/visualizations.py                                           -- #
 # -- ------------------------------------------------------------------------------------------------------------------------   -- #
 """
 
