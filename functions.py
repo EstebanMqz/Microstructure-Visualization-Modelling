@@ -77,5 +77,28 @@ def find_exchanges(features=None, is_authenticated=False):
 
     return exchange_names 
 
+
+def concatenate(df1,df2,df3, n):
+    """
+    Function that returns Microstructure Visualization for 3 different exchanges 
+    and given dataframes that must contain the same cols: cols_ob, cols_ohlcv.
+
+        Parameters:
+        ----------
+        df1: Order_Books or OHLCV Microstucture data for exchange 1.
+        df2: Order_Books or OHLCV Microstucture data for exchange 2.
+        df3: Order_Books or OHLCV Microstucture data for exchange 3.
+        n: fetched OB & OHLCV data for each exchange. 
+
+        Returns:
+        -------
+        df_MS: Array of authenticated exchanges avaliable in CCTX.
+
+    """
+    dfs = [df1, df2, df3]
+    df_MS = pd.concat(dfs)
+    df_MS.index = range(n*3)
+
+    return df_MS
     
 
