@@ -77,47 +77,5 @@ def find_exchanges(features=None, is_authenticated=False):
 
     return exchange_names 
 
-
-def cctx_download(lvls, cripto, exchange):
-    """
-    Function that returns prices and quantities of given levels (as integer) Bids & Asks in an Orderbook
-    for the specified criptocurrency ('BTC/USDT','ETH/USDT','XRP/USDT', or others) and
-    from the following exchanges: binance, ftx or ascendex (as string).
-
-        Parameters:
-        ----------
-        lvls: Levels of bids/asks in the Order Book (int).
-        cripto: Criptocurrency downloadable ticker (str).
-        exchanges: Criptocurrency downloadable Exchange (str).
-
-        Returns:
-        -------
-        levels_ob_bid: Prices and Quantities of Bids (pos [0]) and Asks (pos [1]) as dataframes.
-    """
-    if exchange == 'binance':
-        binance = ccxt.binance()
-        levels_ob = binance.fetch_order_book(cripto, limit=lvls) #Order Books 
-        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
-        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
-        levels_ob_bid.index.name = 'Bid_Lvl' 
-        levels_ob_ask.index.name = 'Ask_Lvl'   
-
-    elif exchange == 'ftx':
-        ftx = ccxt.ftx()
-        levels_ob = ftx.fetch_order_book(cripto, limit=lvls) #Order Books 
-        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
-        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
-        levels_ob_bid.index.name = 'Bid_Lvl' 
-        levels_ob_ask.index.name = 'Ask_Lvl' 
-
-    elif exchange == 'ascendex':
-        ascendex = ccxt.ascendex()
-        levels_ob = ascendex.fetch_order_book(cripto, limit=lvls) #Order Books 
-        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
-        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
-        levels_ob_bid.index.name = 'Bid_Lvl' 
-        levels_ob_ask.index.name = 'Ask_Lvl'      
-
-    return levels_ob_bid, levels_ob_ask
     
 

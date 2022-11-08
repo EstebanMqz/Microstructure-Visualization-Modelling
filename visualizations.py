@@ -11,6 +11,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go #plotly
+import ccxt #Criptocurrencies
+import time 
 import plotly.express as px
 from data import *
 
@@ -20,30 +22,114 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_rep', True)
 pd.set_option('display.width', None)
 
-
-def hist_csv(df, title, tickers, weights):
+def cctx_download(lvls, cripto, exchange):
     """
-    Function that returns histogram of tickers and weights of portfolio in a df.
+    Function that returns prices and quantities of given levels (as integer) Bids & Asks in an Orderbook
+    for the specified criptocurrency ('BTC/USDT','ETH/USDT','XRP/USDT', or others) and
+    from the following exchanges: binance, ftx or ascendex (as string).
+
+        Parameters:
+        ----------
+        lvls: Levels of bids/asks in the Order Book (int).
+        cripto: Criptocurrency downloadable ticker (str).
+        exchanges: Criptocurrency downloadable Exchange (str).
+
+        Returns:
+        -------
+        levels_ob_bid: Prices and Quantities of Bids (pos [0]) and Asks (pos [1]) as dataframes.
+    """
+    if exchange == 'binance':
+        binance = ccxt.binance()
+        levels_ob = binance.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl'   
+
+    elif exchange == 'ftx':
+        ftx = ccxt.ftx()
+        levels_ob = ftx.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl' 
+
+    elif exchange == 'bytetrade':
+        bytetrade = ccxt.bytetrade()
+        levels_ob = bytetrade.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl'      
+
+    return levels_ob_bid, levels_ob_ask
+
+
+def OBLvls_hist(lvls, cripto, exchange):
+    """
+    Function that plots an horizontal histogram in plotly for CriptoCurrencies OB/
 
         Parameters
         ----------
-        df: Tickers and Weights of stocks in a dataframe.
-        title: Title of the histogram.
-        tickers: Column with tickers as str.
-        weights: Column with tickers as str.
+        lvls: Levels of bids/asks in the Order Book (int).
+        cripto: Criptocurrency downloadable ticker (str).
+        exchanges: Criptocurrency downloadable Exchange (str).
+
+        x: Quantity (col) of the given cripto (str) for given lvls (int) in Order Book.
+        y: Prices (col) of the given cripto (str) for given lvls (int) in Order Book.
 
         Returns
         -------
-        histogram of Tickers and Weights of the portfolio in a df.
+        Histogram of Order Book prices and quantities for n given lvls.
     """
-    fig = px.histogram([0,1], x=df[tickers], y= df[weights], title=title, color=df[tickers])
-    fig.update_xaxes(categoryorder = 'total descending')
-    fig.update_layout( yaxis = dict( tickfont = dict(size=9)), xaxis_title=tickers, yaxis_title=weights)
-    fig.show()
+    if exchange == 'binance':
+        binance = ccxt.binance()
+        levels_ob = binance.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity'])
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl'   
+
+    elif exchange == 'ftx':
+        ftx = ccxt.ftx()
+        levels_ob = ftx.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl'  
+
+    elif exchange == 'bytetrade':
+        bytetrade = ccxt.bytetrade()
+        levels_ob = bytetrade.fetch_order_book(cripto, limit=lvls) #Order Books 
+        levels_ob_bid = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity']) #Levels and Qt
+        levels_ob_ask = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity']) 
+        levels_ob_bid.index.name = 'Bid_Lvl' 
+        levels_ob_ask.index.name = 'Ask_Lvl'      
+
+    bid = levels_ob['bids'][0][0] if len (levels_ob['bids']) > 0 else None #ToB
+    ask = levels_ob['asks'][0][0] if len (levels_ob['asks']) > 0 else None #ToB
+    mid = (bid+ask)*.5
+
+    fig = go.Figure(layout_xaxis_range=[0,10])
+    fig.add_trace(go.Bar(
+        y= np.array(levels_ob_ask.price.astype(str)),
+        x= levels_ob_ask.quantity,
+        orientation='h',
+    ))
+
+    fig.add_trace(go.Bar(
+        y= np.array(levels_ob_bid.price.astype(str)),
+        x= levels_ob_bid.quantity,
+        orientation='h',
+    ))
+    fig.update_layout(title_text="OB Asks vs Bids. Mid-Price: " + 
+    str(round(mid,6)) + str (', ') + str(exchange) + str (': ') + str(cripto),
+                    title_font_size=15,)     
+
+    return fig.show()
 
 
-
-def plotly_graph(x, y, x_label, y_label, title):
+def Micro(lvls, cripto, exchange, n):
     """
     Function that plots a line+marker graph with plotly.
 
@@ -59,14 +145,66 @@ def plotly_graph(x, y, x_label, y_label, title):
         -------
         Returns a didactic graph with plotly of the selected metric.
     """
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=y, mode='lines+markers',
-    name=y_label, line=dict(color='black'), marker=dict(symbol=3, color='blue')))
-    fig.update_layout(title=title, xaxis_title=x_label, yaxis_title=y_label)
-    fig.update_xaxes(showspikes=True)
-    fig.update_yaxes(showspikes=True)
+    #Cols
+    cols_ob = ['exchange', 'timestamp', 'level', 'ask_volume', 'bid_volume', 'total_volume', 'mid_price', 'vwap']
+    cols_ohlcv = ['exchange','timestamp', 'open', 'high', 'low', 'close', 'volume']
+    #Lists to fill
+    ob_df = [] 
+    ohlcv_df = []
 
-    return fig.show()
+    for i in range(n):
+        if exchange == 'binance':
+            binance = ccxt.binance()
+            levels_ob = binance.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = binance.iso8601(binance.milliseconds())
+            ohlcv = binance.fetch_ohlcv(cripto, limit=1)
+        
+        elif exchange == 'ftx':
+            ftx = ccxt.ftx()
+            levels_ob = ftx.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = ftx.iso8601(ftx.milliseconds())
+            ohlcv = ftx.fetch_ohlcv(cripto, limit=1)
+
+        elif exchange == 'bytetrade':
+            bytetrade = ccxt.bytetrade()
+            levels_ob = bytetrade.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = bytetrade.iso8601(bytetrade.milliseconds())
+            ohlcv = bytetrade.fetch_ohlcv(cripto, limit=1)
+
+        #Order Book
+        bids = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity'])
+        asks = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity'])
+        levels = asks.count()[0]
+        ask_volume = asks.quantity.sum()
+        bid_volume = bids.quantity.sum()
+        total_volume = bid_volume + ask_volume
+        mid_price = (bids.price[0] + asks.price[0])*.5
+        vwap = bids.price[0] + asks.price[0] / (bid_volume + ask_volume)
+        #OHLCV
+        Op = ohlcv[0][1]
+        Hi = ohlcv[0][2]
+        Lo = ohlcv[0][3]
+        Cl = ohlcv[0][4]
+        Vol = ohlcv[0][5]
+
+        #Append Order Book data to df.
+        ob_df.append([exchange, timestamp, levels, ask_volume, bid_volume, total_volume, mid_price, vwap])
+        df1 = pd.DataFrame(ob_df, columns = cols_ob)
+        df1.index.name = 'Order_Books'
+
+        #Append OHLCV data to df.
+        ohlcv_df.append([exchange, timestamp, Op, Hi, Lo, Cl, Vol])
+        df2 = pd.DataFrame(ohlcv_df, columns = cols_ohlcv)
+        df2.index.name = 'OHLCV'
+        #timestamp = binance.iso8601(binance.milliseconds())
+        #df2['timestamp'] = timestamp
+        time.sleep(1)
+
+    df1['timestamp'] = [df1['timestamp'][i].strip('Z') for i in range(0, len(df1))]
+    df2['timestamp'] = [df2['timestamp'][i].strip('Z') for i in range(0, len(df2))]
+            
+    return df1,df2
+
 
     
 
