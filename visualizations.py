@@ -151,7 +151,7 @@ def OBLvls_hist(lvls, cripto, exchange):
     return fig.show()
 
 
-def Micro(lvls, cripto, exchange, n):
+def Micro(lvls, cripto, exchange, n, ts):
     """
     Function that returns Microstructure OB and OHLCV for i levels (as integer) n times 
     from specified criptocurrency ('BTC/USDT','ETH/USDT','XRP/USDT', or others) and the 
@@ -163,6 +163,7 @@ def Micro(lvls, cripto, exchange, n):
     cripto: Criptocurrency downloadable ticker (str).
     exchanges: Criptocurrency downloadable Exchange (str).
     n: Data retrieval per exchange (int).
+    ts: timesleep (s) required in between data retrieval.
 
     Returns:
     -------
@@ -222,7 +223,7 @@ def Micro(lvls, cripto, exchange, n):
         df2.index.name = 'OHLCV'
         #timestamp = binance.iso8601(binance.milliseconds())
         #df2['timestamp'] = timestamp
-        time.sleep(1)
+        time.sleep(ts)
 
     df1['timestamp'] = [df1['timestamp'][i].strip('Z') for i in range(0, len(df1))]
     df2['timestamp'] = [df2['timestamp'][i].strip('Z') for i in range(0, len(df2))]
@@ -304,6 +305,84 @@ def verif_ex1(lvls, cripto, exchange, n):
 
         time.sleep(1)
         df2['timestamp'] = [df2['timestamp'][i].strip('Z') for i in range(0, len(df2))]
+
+    df1['timestamp'] = [df1['timestamp'][i].strip('Z') for i in range(0, len(df1))]
+    df2['timestamp'] = [df2['timestamp'][i].strip('Z') for i in range(0, len(df2))]
+            
+    return df1,df2
+
+def Micro_vs(lvls, cripto, exchange, n):
+    """
+    Function that returns Microstructure OB and OHLCV for i levels (as integer) n times 
+    from specified criptocurrency ('BTC/USDT','ETH/USDT','XRP/USDT', or others) and the 
+    following exchanges: binance, ftx or bytetrade (as string).
+
+    Parameters:
+    ----------
+    lvls: Levels of bids/asks in the Order Book (int).
+    cripto: Criptocurrency downloadable ticker (str).
+    exchanges: Criptocurrency downloadable Exchange (str).
+    n: Data retrieval per exchange (int).
+
+    Returns:
+    -------
+    Micro[0]: Order Books Data.
+    Micro[1]: OHLCV Data.
+    """
+    #Cols
+    cols_ob = ['exchange', 'timestamp', 'level', 'ask_volume', 'bid_volume', 'total_volume', 'mid_price', 'vwap']
+    cols_ohlcv = ['exchange','timestamp', 'open', 'high', 'low', 'close', 'volume']
+    #Lists to fill
+    ob_df = [] 
+    ohlcv_df = []
+
+    for i in range(n):
+        if exchange == 'binance':
+            binance = ccxt.binance()
+            levels_ob = binance.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = binance.iso8601(binance.milliseconds())
+            ohlcv = binance.fetch_ohlcv(cripto, limit=1)
+        
+        elif exchange == 'ftx':
+            ftx = ccxt.ftx()
+            levels_ob = ftx.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = ftx.iso8601(ftx.milliseconds())
+            ohlcv = ftx.fetch_ohlcv(cripto, limit=1)
+
+        elif exchange == 'bytetrade':
+            bytetrade = ccxt.bytetrade()
+            levels_ob = bytetrade.fetch_order_book(cripto, limit=lvls) #Order Books 
+            timestamp = bytetrade.iso8601(bytetrade.milliseconds())
+            ohlcv = bytetrade.fetch_ohlcv(cripto, limit=1)
+
+        #Order Book
+        bids = pd.DataFrame(levels_ob['bids'], columns = ['price','quantity'])
+        asks = pd.DataFrame(levels_ob['asks'], columns = ['price','quantity'])
+        levels = asks.count()[0]
+        ask_volume = asks.quantity.sum()
+        bid_volume = bids.quantity.sum()
+        total_volume = bid_volume + ask_volume
+        mid_price = (bids.price[0] + asks.price[0])*.5
+        vwap = bids.price[0] + asks.price[0] / (bid_volume + ask_volume)
+        #OHLCV
+        Op = ohlcv[0][1]
+        Hi = ohlcv[0][2]
+        Lo = ohlcv[0][3]
+        Cl = ohlcv[0][4]
+        Vol = ohlcv[0][5]
+
+        #Append Order Book data to df.
+        ob_df.append([exchange, timestamp, levels, ask_volume, bid_volume, total_volume, mid_price, vwap])
+        df1 = pd.DataFrame(ob_df, columns = cols_ob)
+        df1.index.name = 'Order_Books'
+
+        #Append OHLCV data to df.
+        ohlcv_df.append([exchange, timestamp, Op, Hi, Lo, Cl, Vol])
+        df2 = pd.DataFrame(ohlcv_df, columns = cols_ohlcv)
+        df2.index.name = 'OHLCV'
+        #timestamp = binance.iso8601(binance.milliseconds())
+        #df2['timestamp'] = timestamp
+        time.sleep(.01)
 
     df1['timestamp'] = [df1['timestamp'][i].strip('Z') for i in range(0, len(df1))]
     df2['timestamp'] = [df2['timestamp'][i].strip('Z') for i in range(0, len(df2))]
