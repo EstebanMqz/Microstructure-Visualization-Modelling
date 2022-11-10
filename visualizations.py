@@ -451,16 +451,16 @@ def roll_model(data, n_rezago):
 
 def Roll_plot(Roll_df, cripto, title):
     """
-    Function that plots Mid-Prices (y) and timestamps (x) for exchanges in data.
+    Function that plots Spreads (y) and timestamps (x) for exchanges in data.
     Parameters:
     ----------
-    data_ms: Microstructure data for column extraction ['exchanges', 'Mid_Prices'] and index timestamp as datetime.
+    Roll_df: Roll's Effective Spread dataframe. 
     cripto: Downloadable cripto symbol.
-    title: Title of facet_cols plotly lines before criptocurrency symbol (ex: 'Volume of': XRP/USDT)
+    title: Title of facet_cols plotly lines before criptocurrency symbol (ex: 'Spreads of': XRP/USDT)
     
     Returns:
     -------
-    facet_col plots for Mid-Prices (col) during timestamps of data (index) for exchanges (col).
+    facet_col plots for Spreads (col) during timestamps of data (index) for exchanges (col).
     """
     Roll_df.index = pd.to_datetime(Roll_df['timestamp'])
     new_data = Roll_df[['exchange', 'spread', 'effective_spread']]
