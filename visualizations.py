@@ -11,6 +11,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go #plotly
+import warnings
 import ccxt #Criptocurrencies
 import time 
 import plotly.express as px
@@ -413,5 +414,65 @@ def Plot_line(data_ms, cripto, title):
 
     fig.show()
     
+def roll_model(data, n_rezago):
+    """
+    Function that calculates verification 1 data Roll Model's effective Spread in dataframe.
+    Parameters:
+    ----------
+    data: Microstructure data for column extraction ['exchanges', 'Mid_Prices'] and index timestamp as datetime.
+    n_rezago: Number of lags for Spread calculation
+    
+    Returns:
+    -------
+    dataframe with cols ["exchange", "timestamp", "close_price", "spread", "effective_spread"]
+    """
+    warnings.filterwarnings('ignore') # setting ignore as a parameter
+    pd.options.mode.chained_assignment = None
+    data = data[["exchange", "timestamp", "spread", "close_price"]] #Verif. 1 col. selection
+
+    #close_prices lags (1-n_rezagos)
+    for i in range(n_rezago):
+        data[f"close t-{i + 1}"] = data.iloc[:, -1].shift()
+    data.dropna(inplace=True)
+
+    #delta (1-n_rezagos)
+    for i in range(n_rezago):
+        if i == 0:
+            data[f"Delta t-{i+1}"] = data["close_price"] - data["close t-1"]
+        else:
+            data[f"Delta t-{i+1}"] = data[f"close t-{i}"] - data[f"close t-{i+1}"]
+    #effective spread
+    data["effective_spread"] = [round(i, 6) for i in 2*np.sqrt(abs(np.cov(data.iloc[:,10:])[1]))]
+    #col display
+    data = data[["exchange", "timestamp", "close_price", "spread", "effective_spread"]]
+    data.reset_index(drop=True)
+
+    return data
+
+def Roll_plot(Roll_df, cripto, title):
+    """
+    Function that plots Mid-Prices (y) and timestamps (x) for exchanges in data.
+    Parameters:
+    ----------
+    data_ms: Microstructure data for column extraction ['exchanges', 'Mid_Prices'] and index timestamp as datetime.
+    cripto: Downloadable cripto symbol.
+    title: Title of facet_cols plotly lines before criptocurrency symbol (ex: 'Volume of': XRP/USDT)
+    
+    Returns:
+    -------
+    facet_col plots for Mid-Prices (col) during timestamps of data (index) for exchanges (col).
+    """
+    Roll_df.index = pd.to_datetime(Roll_df['timestamp'])
+    new_data = Roll_df[['exchange', 'spread', 'effective_spread']]
+    
+    fig = go.Figure()
+
+    fig = px.line(new_data, facet_col="exchange", facet_col_wrap=1)
+    fig.update_layout(title_text=title + str(' ') + str(cripto) + str(':'),
+                    title_font_size=15)
+
+    fig.show()
+
+
 
     
