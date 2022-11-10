@@ -31,7 +31,7 @@ def cctx_download(lvls, cripto, exchange):
         Parameters:
         ----------
         lvls: Levels of bids/asks in the Order Book (int).
-        cripto: Criptocurrency downloadable ticker (str).
+        cripto: Criptocurrency downloadable symbol (str).
         exchanges: Criptocurrency downloadable Exchange (str).
 
         Returns:
@@ -94,7 +94,7 @@ def OBLvls_hist(lvls, cripto, exchange):
         Parameters
         ----------
         lvls: Levels of bids/asks in the Order Book (int).
-        cripto: Criptocurrency downloadable ticker (str).
+        cripto: Criptocurrency downloadable symbol (str).
         exchanges: Criptocurrency downloadable Exchange (str).
 
         x: Quantity (col) of the given cripto (str) for given lvls (int) in Order Book.
@@ -132,7 +132,7 @@ def OBLvls_hist(lvls, cripto, exchange):
     ask = levels_ob['asks'][0][0] if len (levels_ob['asks']) > 0 else None #ToB
     mid = (bid+ask)*.5
 
-    fig = go.Figure(layout_xaxis_range=[0,10])
+    fig = go.Figure()
     fig.add_trace(go.Bar(
         y= np.array(levels_ob_ask.price.astype(str)),
         x= levels_ob_ask.quantity,
@@ -144,9 +144,8 @@ def OBLvls_hist(lvls, cripto, exchange):
         x= levels_ob_bid.quantity,
         orientation='h',
     ))
-    fig.update_layout(title_text="OB Asks vs Bids. Mid-Price: " + 
-    str(round(mid,6)) + str (', ') + str(exchange) + str (': ') + str(cripto),
-                    title_font_size=15,)     
+    fig.update_layout(title_text="Single Order Book " + str ('from ') + str(exchange) +
+    str (', ') + str(cripto) + str(' Mid-Price: ') + str(round(mid,6)), title_font_size=15)     
 
     return fig.show()
 
@@ -160,7 +159,7 @@ def Micro(lvls, cripto, exchange, n, ts):
     Parameters:
     ----------
     lvls: Levels of bids/asks in the Order Book (int).
-    cripto: Criptocurrency downloadable ticker (str).
+    cripto: Criptocurrency downloadable symbol (str).
     exchanges: Criptocurrency downloadable Exchange (str).
     n: Data retrieval per exchange (int).
     ts: timesleep (s) required in between data retrieval.
@@ -240,7 +239,7 @@ def verif_ex1(lvls, cripto, exchange, n):
     Parameters:
     ----------
     lvls: Levels of bids/asks in the Order Book (int).
-    cripto: Criptocurrency downloadable ticker (str).
+    cripto: Criptocurrency downloadable symbol (str).
     exchanges: Criptocurrency downloadable Exchange (str).
     n: Data retrieval per exchange (int).
 
@@ -320,7 +319,7 @@ def Micro_vs(lvls, cripto, exchange, n):
     Parameters:
     ----------
     lvls: Levels of bids/asks in the Order Book (int).
-    cripto: Criptocurrency downloadable ticker (str).
+    cripto: Criptocurrency downloadable symbol (str).
     exchanges: Criptocurrency downloadable Exchange (str).
     n: Data retrieval per exchange (int).
 
@@ -390,6 +389,29 @@ def Micro_vs(lvls, cripto, exchange, n):
     return df1,df2
 
 
+def Plot_line(data_ms, cripto, title):
+    """
+    Function that plots Mid-Prices (y) and timestamps (x) for exchanges in data.
+    Parameters:
+    ----------
+    data_ms: Microstructure data for column extraction ['exchanges', 'Mid_Prices'] and index timestamp as datetime.
+    cripto: Downloadable cripto symbol.
+    title: Title of facet_cols plotly lines before criptocurrency symbol (ex: 'Volume of': XRP/USDT)
+    
+    Returns:
+    -------
+    facet_col plots for Mid-Prices (col) during timestamps of data (index) for exchanges (col).
+    """
+    data_ms.index = pd.to_datetime(data_ms['timestamp'])
+    new_data = data_ms[['exchange', 'mid_price']]
+    
+    fig = go.Figure(layout_xaxis_range=[0,10])
+
+    fig = px.line(new_data, facet_col="exchange", facet_col_wrap=1)
+    fig.update_layout(title_text=title + str(' ') + str(cripto) + str(':'),
+                    title_font_size=15)
+
+    fig.show()
     
 
     
